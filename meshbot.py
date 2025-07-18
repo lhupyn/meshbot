@@ -106,8 +106,10 @@ def generate_channel_hash(name: str, key_b64: str) -> int:
         log('error', f"Error generando hash de canal para '{name}': {e}")
         return 0
 
-def encrypt_payload(key_b64: str, packet_id: int, from_node_id: int, payload_bytes: bytes) -> bytes:
-    if key_b64 == "AQ==": key_b64 = "1PG7OiApB1nwvP+rz05pAQ=="
+def encrypt_payload(key_b64: str, packet_id: int, from_node_id: int, payload_bytes: bytes, channel_name: str) -> bytes:
+    # La clave por defecto 'AQ==' se sustituye por la clave interna '1PG...' solo para el canal primario por defecto.
+    if key_b64 == "AQ==" and channel_name == config.PRIMARY_CHANNEL_NAME:
+        key_b64 = "1PG7OiApB1nwvP+rz05pAQ=="
     key_bytes = base64.b64decode(key_b64.encode('ascii'))
     nonce_packet_id = packet_id.to_bytes(8, "little")
     nonce_from_node = from_node_id.to_bytes(8, "little")
@@ -116,8 +118,10 @@ def encrypt_payload(key_b64: str, packet_id: int, from_node_id: int, payload_byt
     encryptor = cipher.encryptor()
     return encryptor.update(payload_bytes) + encryptor.finalize()
 
-def decrypt_payload(key_b64: str, packet_id: int, from_node_id: int, encrypted_payload: bytes) -> bytes:
-    if key_b64 == "AQ==": key_b64 = "1PG7OiApB1nwvP+rz05pAQ=="
+def decrypt_payload(key_b64: str, packet_id: int, from_node_id: int, encrypted_payload: bytes, channel_name: str) -> bytes:
+    # La clave por defecto 'AQ==' se sustituye por la clave interna '1PG...' solo para el canal primario por defecto.
+    if key_b64 == "AQ==" and channel_name == config.PRIMARY_CHANNEL_NAME:
+        key_b64 = "1PG7OiApB1nwvP+rz05pAQ=="
     key_bytes = base64.b64decode(key_b64.encode('ascii'))
     nonce_packet_id = packet_id.to_bytes(8, "little")
     nonce_from_node = from_node_id.to_bytes(8, "little")
@@ -142,7 +146,8 @@ def generate_mesh_packet(destination_id, payload_data, port_num, want_ack, chann
         channel_key,
         mp.id,
         config.OUR_NODE_NUMBER,
-        data.SerializeToString()
+        data.SerializeToString(),
+        channel_name
     )
     mp.encrypted = encrypted_bytes
     return mqtt_pb2.ServiceEnvelope(packet=mp, channel_id=channel_name, gateway_id=OUR_NODE_ID_HEX)
@@ -391,7 +396,7 @@ def process_incoming_meshtastic_packet(client, raw_payload, topic):
             log('debug', f"Paquete cifrado recibido de !{sender_id:08x} en '{source_channel}'. Intentando descifrar...")
             
             try:
-                decrypted_bytes = decrypt_payload(key_to_use, mp.id, sender_id, mp.encrypted)
+                decrypted_bytes = decrypt_payload(key_to_use, mp.id, sender_id, mp.encrypted, source_channel)
                 mp.decoded.ParseFromString(decrypted_bytes)
             except Exception as e:
                 log('error', f"Fallo al descifrar mensaje de !{sender_id:08x} en '{source_channel}'.")
