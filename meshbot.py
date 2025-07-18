@@ -10,40 +10,6 @@ Versión 0.0.1
 Este bot ha sido creado por Gemini (IA de Google), guiado y depurado por LhUpYn.
 Repositorio del proyecto: https://github.com/lhupyn/meshbot
 ===============================================================================
-
-*******************************************************************************
-** **
-** ¡Utiliza el código con precaución!                                        **
-** **
-** Este es un software experimental. El autor no se hace responsable de      **
-** posibles problemas, pérdida de datos o mal funcionamiento de la red.      **
-** Úsalo bajo tu propio riesgo.                                              **
-** **
-*******************************************************************************
-
-Este proyecto no habría sido posible sin el increíble trabajo de la comunidad
-y los proyectos de código abierto que lo sustentan. Nuestro más sincero
-agradecimiento a:
-
-Basado en el concepto original de:
-- MQTT Connect for Meshtastic by pdxlocations
-  (https://github.com/pdxlocations)
-
-Agradecimientos especiales por su código y ayuda:
-- Protos y lógica base de:
-  - https://github.com/arankwende/meshtastic-mqtt-client
-  - https://github.com/joshpirihi/meshtastic-mqtt
-- Cifrado/descifrado:
-  - https://github.com/dstewartgo
-- Y a la comunidad de Meshtastic en Español:
-  - https://meshtastic.es/
-
-Y por supuesto, a los proyectos y organizaciones fundamentales:
-- Powered by Meshtastic™ (https://meshtastic.org)
-- La librería Paho-MQTT de la Eclipse Foundation (https://eclipse.dev/paho/)
-- El equipo de Google, por el acceso a la API de Gemini.
-- La Python Software Foundation.
-
 """
 
 # --- Módulos Estándar de Python ---
@@ -85,12 +51,13 @@ CONVERSATION_HISTORY = {}
 LAST_INVITATION_SENT = {}
 PRIVATE_REQUEST_KEYWORDS = ["dm", "privado", "abreme un privado"]
 
-# --- 2. FUNCIONES AUXILIARES Y DE LOG ---
+# --- FUNCIONES AUXILIARES Y DE LOG ---
 def log(level, message):
+    """Función de logging estándar."""
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f"[{timestamp}] [{level.upper():^9}] {message}")
 
-# --- 3. LÓGICA DE PROTOCOLO Y CIFRADO ---
+# --- LÓGICA DE PROTOCOLO Y CIFRADO ---
 
 def xor_hash(data: bytes) -> int:
     result = 0
@@ -106,10 +73,8 @@ def generate_channel_hash(name: str, key_b64: str) -> int:
         log('error', f"Error generando hash de canal para '{name}': {e}")
         return 0
 
-def encrypt_payload(key_b64: str, packet_id: int, from_node_id: int, payload_bytes: bytes, channel_name: str) -> bytes:
-    # La clave por defecto 'AQ==' se sustituye por la clave interna '1PG...' solo para el canal primario por defecto.
-    if key_b64 == "AQ==" and channel_name == config.PRIMARY_CHANNEL_NAME:
-        key_b64 = "1PG7OiApB1nwvP+rz05pAQ=="
+def encrypt_payload(key_b64: str, packet_id: int, from_node_id: int, payload_bytes: bytes) -> bytes:
+    if key_b64 == "AQ==": key_b64 = "1PG7OiApB1nwvP+rz05pAQ=="
     key_bytes = base64.b64decode(key_b64.encode('ascii'))
     nonce_packet_id = packet_id.to_bytes(8, "little")
     nonce_from_node = from_node_id.to_bytes(8, "little")
@@ -118,10 +83,8 @@ def encrypt_payload(key_b64: str, packet_id: int, from_node_id: int, payload_byt
     encryptor = cipher.encryptor()
     return encryptor.update(payload_bytes) + encryptor.finalize()
 
-def decrypt_payload(key_b64: str, packet_id: int, from_node_id: int, encrypted_payload: bytes, channel_name: str) -> bytes:
-    # La clave por defecto 'AQ==' se sustituye por la clave interna '1PG...' solo para el canal primario por defecto.
-    if key_b64 == "AQ==" and channel_name == config.PRIMARY_CHANNEL_NAME:
-        key_b64 = "1PG7OiApB1nwvP+rz05pAQ=="
+def decrypt_payload(key_b64: str, packet_id: int, from_node_id: int, encrypted_payload: bytes) -> bytes:
+    if key_b64 == "AQ==": key_b64 = "1PG7OiApB1nwvP+rz05pAQ=="
     key_bytes = base64.b64decode(key_b64.encode('ascii'))
     nonce_packet_id = packet_id.to_bytes(8, "little")
     nonce_from_node = from_node_id.to_bytes(8, "little")
@@ -146,8 +109,7 @@ def generate_mesh_packet(destination_id, payload_data, port_num, want_ack, chann
         channel_key,
         mp.id,
         config.OUR_NODE_NUMBER,
-        data.SerializeToString(),
-        channel_name
+        data.SerializeToString()
     )
     mp.encrypted = encrypted_bytes
     return mqtt_pb2.ServiceEnvelope(packet=mp, channel_id=channel_name, gateway_id=OUR_NODE_ID_HEX)
@@ -182,7 +144,7 @@ def send_long_message(client, destination_id, text, channel_name):
 def publish_meshtastic_message(client, destination_id, text_message, channel_name, is_part_of_long_message=False):
     encoded_message = text_message.encode('utf-8')
     if not is_part_of_long_message and len(encoded_message) > mesh_pb2.Constants.DATA_PAYLOAD_LEN:
-         log('advertencia', "Mensaje largo enviado a publish_meshtastic_message. Usando send_long_message.")
+         log('advertencia', "Mensaje largo detectado. Usando send_long_message para dividirlo.")
          send_long_message(client, destination_id, text_message, channel_name); return
     
     channel_key = config.PRIMARY_CHANNEL_KEY_B64
@@ -194,7 +156,7 @@ def publish_meshtastic_message(client, destination_id, text_message, channel_nam
         topic = f"{config.ROOT_TOPIC}/2/e/{channel_name}/{OUR_NODE_ID_HEX}"
         client.publish(topic, service_envelope.SerializeToString())
         log_dest = "BROADCAST" if destination_id == BROADCAST_NUM else f"!{destination_id:08x}"
-        log('info', f"Mensaje (cifrado) enviado a {log_dest} en '{channel_name}': '{text_message}'")
+        log('info', f"Mensaje enviado a {log_dest} en '{channel_name}': '{text_message}'")
 
 def publish_nodeinfo(client):
     """Publishes node info to all configured channels."""
@@ -239,7 +201,7 @@ def publish_position(client):
     except Exception as e:
         log('error', f"No se pudo enviar la Posición: {e}")
 
-# --- 4. INTEGRACIÓN CON GEMINI ---
+# --- INTEGRACIÓN CON GEMINI ---
 get_weather_tool = genai.protos.Tool(
     function_declarations=[
         genai.protos.FunctionDeclaration(
@@ -323,7 +285,7 @@ def get_ai_response(text, sender_id):
         )
         
         model = genai.GenerativeModel(
-            'gemini-2.5-flash-lite-preview-06-17', 
+            'gemini-1.5-flash-latest', 
             tools=[get_weather_tool, get_time_tool, get_node_data_tool], 
             system_instruction=system_instruction
         )
@@ -333,77 +295,88 @@ def get_ai_response(text, sender_id):
         
         log('debug', f"Enviando a Gemini para !{sender_id:08x}: '{final_prompt}'")
         response = chat.send_message(final_prompt)
-        part = response.candidates[0].content.parts[0]
         
-        while hasattr(part, 'function_call') and part.function_call.name:
-            function_call = part.function_call
-            log('info', f"Gemini quiere llamar a la función: {function_call.name}")
-            api_response = None
-            if function_call.name == 'get_weather_data':
-                city_arg = function_call.args.get('city')
-                if city_arg: api_response = get_weather_data(city=city_arg)
-                else: log('warning', "Gemini intentó llamar a get_weather_data sin el argumento 'city'."); break
-            elif function_call.name == 'get_current_time':
-                api_response = get_current_time()
-            elif function_call.name == 'get_node_info_for_ai':
-                node_arg = function_call.args.get('node_identifier')
-                if node_arg:
-                    api_response = get_node_info_for_ai(node_identifier=node_arg)
-                else:
-                    log('warning', "Gemini intentó llamar a get_node_info_for_ai sin el argumento 'node_identifier'.")
-                    break
+        while True:
+            # CORRECCIÓN: Bucle para manejar múltiples llamadas a función
+            function_calls = []
+            for part in response.candidates[0].content.parts:
+                if part.function_call:
+                    function_calls.append(part.function_call)
             
-            if api_response:
-                response = chat.send_message(
-                    genai.protos.Part(function_response=genai.protos.FunctionResponse(
-                        name=function_call.name, 
-                        response={'result': api_response}
-                    ))
-                )
-                part = response.candidates[0].content.parts[0]
-            else:
-                break
-        
-        response_text = part.text.strip().replace('\n', ' ')
-        CONVERSATION_HISTORY[sender_id] = chat.history
-        return response_text
+            if not function_calls:
+                # No hay más llamadas a función, la respuesta final está lista
+                response_text = response.candidates[0].content.parts[0].text.strip().replace('\n', ' ')
+                CONVERSATION_HISTORY[sender_id] = chat.history
+                return response_text
+
+            # Hay llamadas a función, las ejecutamos todas
+            log('info', f"Gemini quiere llamar a {len(function_calls)} función(es).")
+            
+            function_responses = []
+            for function_call in function_calls:
+                log('info', f"Ejecutando: {function_call.name}")
+                api_response = None
+                if function_call.name == 'get_weather_data':
+                    city_arg = function_call.args.get('city')
+                    if city_arg: api_response = get_weather_data(city=city_arg)
+                    else: log('warning', "Llamada a get_weather_data sin 'city'."); api_response = "Error: falta la ciudad."
+                elif function_call.name == 'get_current_time':
+                    api_response = get_current_time()
+                elif function_call.name == 'get_node_info_for_ai':
+                    node_arg = function_call.args.get('node_identifier')
+                    if node_arg: api_response = get_node_info_for_ai(node_identifier=node_arg)
+                    else: log('warning', "Llamada a get_node_info_for_ai sin 'node_identifier'."); api_response = "Error: falta el nodo."
+                
+                function_responses.append(genai.protos.Part(
+                    function_response=genai.protos.FunctionResponse(
+                        name=function_call.name,
+                        response={'result': api_response or "Error ejecutando función."}
+                    )
+                ))
+
+            # Enviamos todas las respuestas de las funciones a la vez
+            log('info', f"Enviando {len(function_responses)} resultado(s) de vuelta a Gemini.")
+            response = chat.send_message(function_responses)
+
     except Exception as e:
         log('error', f"Error en la interacción con Gemini: {e}")
         return "Tuve un problema al procesar tu solicitud con la IA."
 
-# --- 5. PROCESAMIENTO DE MENSAJES ENTRANTES ---
+# --- PROCESAMIENTO DE MENSAJES ENTRANTES ---
 def process_incoming_meshtastic_packet(client, raw_payload, topic):
     try:
         se = mqtt_pb2.ServiceEnvelope(); se.ParseFromString(raw_payload)
         mp = se.packet
         sender_id = getattr(mp, 'from')
-        if sender_id == config.OUR_NODE_NUMBER or database.message_id_exists(mp.id):
+        
+        if sender_id == config.OUR_NODE_NUMBER:
             return
+        
+        if database.message_id_exists(mp.id):
+            return
+        
         database.add_message_id(mp.id)
         source_channel = se.channel_id
 
         if mp.HasField('encrypted'):
             key_to_use = None
+            
             if source_channel == config.PRIMARY_CHANNEL_NAME:
                 key_to_use = config.PRIMARY_CHANNEL_KEY_B64
             elif config.SECONDARY_CHANNEL_ENABLED and source_channel == config.SECONDARY_CHANNEL_NAME:
                 key_to_use = config.SECONDARY_CHANNEL_KEY_B64
             
             if not key_to_use:
-                log('advertencia', f"Mensaje recibido en un canal no configurado ('{source_channel}'). Ignorando.")
                 return
 
-            log('debug', f"Paquete cifrado recibido de !{sender_id:08x} en '{source_channel}'. Intentando descifrar...")
-            
             try:
-                decrypted_bytes = decrypt_payload(key_to_use, mp.id, sender_id, mp.encrypted, source_channel)
+                decrypted_bytes = decrypt_payload(key_to_use, mp.id, sender_id, mp.encrypted)
                 mp.decoded.ParseFromString(decrypted_bytes)
             except Exception as e:
-                log('error', f"Fallo al descifrar mensaje de !{sender_id:08x} en '{source_channel}'.")
+                log('error', f"Fallo al descifrar mensaje de !{sender_id:08x} en '{source_channel}'. Clave incorrecta o paquete corrupto.")
                 return
 
         if not mp.HasField('decoded'):
-            log('advertencia', f"Paquete de !{sender_id:08x} sin payload descifrable. Ignorando.")
             return
 
         port_num = mp.decoded.portnum
@@ -413,7 +386,7 @@ def process_incoming_meshtastic_packet(client, raw_payload, topic):
             user_info = mesh_pb2.User(); user_info.ParseFromString(mp.decoded.payload)
             log('info', f"NodeInfo recibido de !{sender_id:08x} ({user_info.long_name}) {log_channel_msg}")
             database.update_node(node_id=sender_id, long_name=user_info.long_name, short_name=user_info.short_name)
-
+        
         elif port_num == portnums_pb2.POSITION_APP:
             pos_info = mesh_pb2.Position(); pos_info.ParseFromString(mp.decoded.payload)
             lat, lon, alt = pos_info.latitude_i * 1e-7, pos_info.longitude_i * 1e-7, pos_info.altitude
@@ -492,7 +465,8 @@ def process_incoming_meshtastic_packet(client, raw_payload, topic):
     except Exception as e:
         log('error', f"Error procesando paquete entrante: {e}")
 
-# --- 6. CALLBACKS DE MQTT Y TAREAS PROGRAMADAS ---
+
+# --- CALLBACKS DE MQTT Y TAREAS PROGRAMADAS ---
 def on_connect(client, userdata, flags, rc, properties):
     if rc == 0:
         log('info', f"Conectado a {config.MQTT_BROKER}")
@@ -549,7 +523,7 @@ def database_cleanup_scheduler():
         except Exception as e:
             log('error', f"Error durante la limpieza programada de la base de datos: {e}")
 
-# --- 8. FUNCIÓN PRINCIPAL ---
+# --- FUNCIÓN PRINCIPAL ---
 def main():
     log('info', f"Iniciando 🤖 {config.OUR_LONG_NAME} v0.0.1...")
     database.init_db()
