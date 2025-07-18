@@ -2,6 +2,47 @@
 
 MeshBot es un nodo virtual avanzado y personalizable para la red Meshtastic. Se conecta a un bróker MQTT para escuchar el tráfico de la red, recopilar datos de telemetría de los nodos y responder a los usuarios utilizando la inteligencia artificial de Google Gemini.
 
+```mermaid
+flowchart LR
+    subgraph Red LoRa
+        direction TB
+        RM["💬<br>Radio (Mensajería)"]
+        RT["🛰️<br>Radios (Telemetría)"]
+        RU["📻<br>Radio Usuario"]
+    end
+
+    subgraph Puente de Red
+        direction TB
+        G2["📡<br>Gateway 2"]
+        G1["📡<br>Gateway 1"]
+    end
+
+    subgraph Infraestructura Local/Cloud
+        direction TB
+        MB["🤖<br>MeshBot<br>(Nodo Virtual)"]
+        M["🌐<br>Broker MQTT"]
+    end
+
+    subgraph Servicios Externos
+        IA["🧠<br>IA (GPU)"]
+    end
+
+    %% Flujo de Entrada
+    RM -- "Mensaje" --> G2
+    RT -- "Datos" --> G2
+    RU -- "Mensaje" --> G1
+    G1 --> M
+    G2 --> M
+    
+    %% Flujo Interno y Procesamiento
+    M <-->|Respuesta| MB
+    MB <-->|Consulta API / Respuesta| IA
+    
+    %% Flujo de Salida
+    M -- "Respuesta" --> G1
+    G1 -- "Respuesta" --> RU
+```
+
 ## ✨ Características Principales
 
 * **Inteligencia Artificial Conversacional**: Utiliza Google Gemini para mantener conversaciones fluidas, responder preguntas y entender el contexto.
