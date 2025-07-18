@@ -6,9 +6,9 @@ MeshBot es un nodo virtual avanzado y personalizable para la red Meshtastic. Se 
 flowchart LR
     subgraph Red LoRa
         direction TB
-        RM["💬<br>Radio (Mensajería)"]
-        RT["🛰️<br>Radios (Telemetría)"]
         RU["📻<br>Radio Usuario"]
+        RM["💬<br>Radios (Mensajería)"]
+        RT["🛰️<br>Radios (Telemetría)"]
     end
 
     subgraph Puente de Red
