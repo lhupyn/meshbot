@@ -17,6 +17,11 @@ flowchart LR
         G1["📡<br>Gateway 1"]
     end
 
+   subgraph CLIENTE MQTT
+        direction TB
+        MO["📱<br>Nodo Virtual"]
+    end
+
     subgraph RED LOCAL / CLOUD
         direction TB
         MB["🤖<br>Nodo Virtual<br>(MeshBot)"]
@@ -33,20 +38,21 @@ flowchart LR
     end
 
     %% Flujo de Entrada
-    RM -- "Mensaje" --> G2
-    RT -- "Datos" --> G2
-    RU -- "Mensaje" --> G1
+    RM --> G2
+    RT --> G2
+    RU --> G1
     G1 --> M
     G2 --> M
+    MO --> M
     %% Flujo Interno y Procesamiento
     M <-->|Respuesta| MB
     MB <-->|Consulta / Respuesta| IA
     %% Flujo Externo y Datos
-    IA <-->|Consulta / Respuesta| CLI
-    IA <-->|Consulta / Respuesta| GEO
-    IA <-->|Consulta / Respuesta| BD
-    IA <-->|Consulta / Respuesta| AD
-    IA <-->|Consulta / Respuesta| N
+    IA <--> CLI
+    IA <--> GEO
+    IA <--> BD
+    IA <--> AD
+    IA <--> N
     %% Flujo de Salida
     M -- "Respuesta" --> G1
     G1 -- "Respuesta" --> RU
