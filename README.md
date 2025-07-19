@@ -1,4 +1,4 @@
-# MeshBot: Un Asistente Inteligente para Meshtastic
+# MeshBot: Un nodo para Meshtastic
 
 MeshBot es un nodo virtual avanzado y personalizable para la red Meshtastic. Se conecta a un bróker MQTT para escuchar el tráfico de la red, recopilar datos de telemetría de los nodos y responder a los usuarios utilizando la inteligencia artificial de Google Gemini.
 
@@ -19,12 +19,17 @@ flowchart LR
 
     subgraph Infraestructura Local/Cloud
         direction TB
-        MB["🤖<br>MeshBot<br>(Nodo Virtual)"]
+        MB["🤖<br>Nodo Virtual<br>(MeshBot)"]
         M["🌐<br>Broker MQTT"]
+        IA["🧠<br>LLM (GPU)<br>(ChatBot)"]
     end
 
-    subgraph Servicios Externos
-        IA["🧠<br>IA (GPU)"]
+    subgraph Servicios API externos
+        CLI["☁️<br>Climatología"]
+        GEO["🗺️<br>Cartografía"]
+        BD["🗄️<br>Base de Datos"]
+        AD["📈<br>Análisis de Datos"]
+        N["🔔<br>Notificaciones"]
     end
 
     %% Flujo de Entrada
@@ -36,8 +41,12 @@ flowchart LR
     
     %% Flujo Interno y Procesamiento
     M <-->|Respuesta| MB
-    MB <-->|Consulta API / Respuesta| IA
-    
+    MB <-->|Consulta / Respuesta| IA
+    IA <-->|Consulta / Respuesta| CLI
+    IA <-->|Consulta / Respuesta| GEO
+    IA <-->|Consulta / Respuesta| BD
+    IA <-->|Consulta / Respuesta| AD
+    IA <-->|Consulta / Respuesta| N
     %% Flujo de Salida
     M -- "Respuesta" --> G1
     G1 -- "Respuesta" --> RU
@@ -73,7 +82,7 @@ Este es un software **experimental**. Ha sido desarrollado con fines de aprendiz
 #### 2. Clonar y Preparar el Entorno
 
 ```bash
-git clone [https://github.com/lhupyn/meshbot.git](https://github.com/lhupyn/meshbot.git)
+git clone https://github.com/lhupyn/meshbot.git
 cd meshbot
 python3 -m venv venv
 source venv/bin/activate  # En macOS/Linux
@@ -141,15 +150,8 @@ Para detenerlo, pulsa `Ctrl + C`.
 
 Este proyecto no habría sido posible sin el increíble trabajo de la comunidad y los proyectos de código abierto que lo sustentan. Nuestro más sincero agradecimiento a:
 
-* **Comunidad y Soporte:** A la comunidad de [**Meshtastic en Español**](https://meshtastic.es/).
 * **Concepto Original:** [`MQTT Connect for Meshtastic`](https://github.com/pdxlocations/connect) by `pdxlocations`.
-* **Código y Librerías:**
-    * El equipo de [**Meshtastic™**](https://meshtastic.org).
-    * La [**Eclipse Foundation**](https://eclipse.dev/paho/) por la librería Paho-MQTT.
-    * El equipo de **Google** por el acceso a la API de Gemini.
-    * La **Python Software Foundation**.
-    * A [`arankwende`](https://github.com/arankwende/meshtastic-mqtt-client) y [`joshpirihi`](https://github.com/joshpirihi/meshtastic-mqtt) por la lógica base de MQTT.
-    * A [`dstewartgo`](https://github.com/dstewartgo) por el cifrado.
+
 
 ---
 *Creado con ❤️ por LhUpYn y Gemini.*
