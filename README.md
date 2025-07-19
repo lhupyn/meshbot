@@ -1,4 +1,4 @@
-# MeshBot: Un Asistente para Meshtastic
+# MeshBot: Servidor Inteligente para Meshtastic
 
 MeshBot es un nodo virtual avanzado y personalizable para la red Meshtastic. Se conecta a un bróker MQTT para escuchar el tráfico de la red, recopilar datos de telemetría de los nodos y responder a los usuarios utilizando la inteligencia artificial de Google Gemini.
 
