@@ -38,10 +38,10 @@ flowchart LR
     RU -- "Mensaje" --> G1
     G1 --> M
     G2 --> M
-    
     %% Flujo Interno y Procesamiento
     M <-->|Respuesta| MB
     MB <-->|Consulta / Respuesta| IA
+    %% Flujo Externo y Datos
     IA <-->|Consulta / Respuesta| CLI
     IA <-->|Consulta / Respuesta| GEO
     IA <-->|Consulta / Respuesta| BD
