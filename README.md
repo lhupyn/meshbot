@@ -19,7 +19,7 @@ flowchart LR
 
    subgraph CLIENTE MQTT
         direction TB
-        MO["📱<br>Nodo Virtual"]
+        MO["📱<br>Nodo Virtual<br>(connect)"]
     end
 
     subgraph RED LOCAL / CLOUD
