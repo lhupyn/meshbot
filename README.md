@@ -4,27 +4,27 @@ MeshBot es un nodo virtual avanzado y personalizable para la red Meshtastic. Se 
 
 ```mermaid
 flowchart LR
-    subgraph Red LoRa
+    subgraph RED LORA
         direction TB
         RU["📻<br>Radio Usuario"]
         RM["💬<br>Radios (Mensajería)"]
         RT["🛰️<br>Radios (Telemetría)"]
     end
 
-    subgraph Puente de Red
+    subgraph LORA - MQTT
         direction TB
         G2["📡<br>Gateway 2"]
         G1["📡<br>Gateway 1"]
     end
 
-    subgraph Infraestructura Local/Cloud
+    subgraph RED LOCAL / CLOUD
         direction TB
         MB["🤖<br>Nodo Virtual<br>(MeshBot)"]
-        M["🌐<br>Broker MQTT"]
+        M["🌐<br>Broker MQTT<br>(Topics)"]
         IA["🧠<br>LLM (GPU)<br>(ChatBot)"]
     end
 
-    subgraph Servicios API externos
+    subgraph SERVICIOS API
         CLI["☁️<br>Climatología"]
         GEO["🗺️<br>Cartografía"]
         BD["🗄️<br>Base de Datos"]
