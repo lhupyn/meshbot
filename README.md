@@ -1,4 +1,4 @@
-# MeshBot: Asistente para Meshtastic
+# MeshBot: Un Asistente para Meshtastic
 
 MeshBot es un nodo virtual avanzado y personalizable para la red Meshtastic. Se conecta a un bróker MQTT para escuchar el tráfico de la red, recopilar datos de telemetría de los nodos y responder a los usuarios utilizando la inteligencia artificial de Google Gemini.
 
@@ -6,9 +6,9 @@ MeshBot es un nodo virtual avanzado y personalizable para la red Meshtastic. Se 
 flowchart LR
     subgraph RED LORA
         direction TB
-        RU["📻<br>Radio Usuario"]
-        RM["💬<br>Radios (Mensajería)"]
-        RT["🛰️<br>Radios (Telemetría)"]
+        RU["📻<br>Nodo Usuario"]
+        RM["💬<br>Nodo (Mensajería)"]
+        RT["🛰️<br>Nodo (Telemetría)"]
     end
 
     subgraph LORA - MQTT
