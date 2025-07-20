@@ -68,7 +68,7 @@ flowchart LR
 * **Inteligencia Artificial Conversacional**: Utiliza Google Gemini para mantener conversaciones fluidas, responder preguntas y entender el contexto.
 * **Soporte Multi-Canal**: Escucha y procesa datos de un canal primario (telemetría) y uno secundario (interacción).
 * **Recopilación de Telemetría**: Guarda en una base de datos la información de los nodos (posición, batería, etc.).
-* **Herramientas de IA**: Puede consultar el tiempo, la hora o los datos de cualquier nodo de la red.
+* **Herramientas de IA**: Puede consultar el tiempo, la hora o los datos de cualquier nodo de la red mqtt.
 * **Sistema de Comandos**: Incluye comandos rápidos con prefijo `!` para acciones directas.
 
 ---
