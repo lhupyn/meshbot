@@ -1,10 +1,10 @@
 # MeshBot: Cliente MQTT / LLM para Meshtastic
 
-MeshBot es un nodo virtual avanzado y personalizable para la red Meshtastic. Se conecta a un bróker MQTT para escuchar el tráfico de la red, recopilar mensajes y datos de telemetría de los nodos, también permite acceder a una gran cantidad de información a través de un dispositivo con ancho de banda limitado utilizando el LLM de Google Gemini.
+MeshBot es un nodo virtual avanzado y personalizable para Meshtastic. Se conecta a un bróker MQTT para escuchar el tráfico de la malla, recopilar mensajes y datos de telemetría de los nodos, también permite acceder a una gran cantidad de información a través de un dispositivo con ancho de banda limitado utilizando el LLM de Google Gemini.
 
 ```mermaid
 flowchart LR
-    subgraph RED LORA
+    subgraph MALLA LORA
         direction TB
         RU["📻<br>Nodo Usuario<br>(Consulta)"]
         RM["💬<br>Nodo (Mensajería)"]
