@@ -1,4 +1,4 @@
-# MeshBot: Servidor Inteligente para Meshtastic
+# MeshBot: LLM para Meshtastic
 
 MeshBot es un nodo virtual avanzado y personalizable para la red Meshtastic. Se conecta a un bróker MQTT para escuchar el tráfico de la red, recopilar datos de telemetría de los nodos y responder a los usuarios utilizando la inteligencia artificial de Google Gemini.
 
@@ -6,7 +6,7 @@ MeshBot es un nodo virtual avanzado y personalizable para la red Meshtastic. Se 
 flowchart LR
     subgraph RED LORA
         direction TB
-        RU["📻<br>Nodo Usuario"]
+        RU["📻<br>Nodo Usuario<br>(Consulta)"]
         RM["💬<br>Nodo (Mensajería)"]
         RT["🛰️<br>Nodo (Telemetría)"]
     end
@@ -22,6 +22,11 @@ flowchart LR
         MO["📱<br>Nodo Virtual<br>(connect)"]
     end
 
+   subgraph CLIENTE MQTT - LLM
+        MB["🤖<br>Nodo Virtual<br>(MeshBot)"]
+        IA["🧠<br>LLM (GPU)<br>(ChatBot)"]
+    end
+
     subgraph RED LOCAL / CLOUD
         direction TB
         MB["🤖<br>Nodo Virtual<br>(MeshBot)"]
@@ -31,10 +36,10 @@ flowchart LR
 
     subgraph SERVICIOS API
         CLI["☁️<br>Climatología"]
-        GEO["🗺️<br>Cartografía"]
+        GEO["🗺️<br>Cartografía<br>(en desarrollo)"]
         BD["🗄️<br>Base de Datos"]
-        AD["📈<br>Análisis de Datos"]
-        N["🔔<br>Notificaciones"]
+        AD["📈<br>Análisis de Datos<br>(en desarrollo)"]
+        N["🔔<br>Notificaciones<br>(en desarrollo)"]
     end
 
     %% Flujo de Entrada
@@ -147,8 +152,17 @@ Para detenerlo, pulsa `Ctrl + C`.
 ### Interactuar con el Bot
 
 * **Mensaje Directo (DM)**: Envía un mensaje privado al bot para conversar con la IA.
-* **Mención Pública**: En el canal secundario, escribe `@meshbot` seguido de tu pregunta.
+* **Mención Pública**: En el canal secundario, escribe `@meshbot` seguido de ping (o una consulta) y te abrirá un DM. 
 * **Comandos**: Usa el prefijo `!` para acciones rápidas (ej. `!tiempo Madrid`).
+
+    !ping: Comprueba si el bot está online.
+    !info: Muestra información sobre este bot.
+    !ayuda: Muestra esta lista de comandos.
+    !tiempo: Muestra el tiempo para tu ubicación, un nodo o una ciudad.
+    !hora: Muestra la hora actual del servidor.
+    !reset: Borra tu historial de conversación con la IA.
+    !nodo: Muestra info detallada de un nodo. Ej: !nodo @MiNodo
+    !meshbot: Muestra información sobre cómo usar el bot de IA.
 
 ---
 
