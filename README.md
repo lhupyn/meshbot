@@ -156,12 +156,19 @@ Para detenerlo, pulsa `Ctrl + C`.
 * **Comandos**: Usa el prefijo `!` para acciones rápidas (ej. `!tiempo Madrid`).
 
     !ping: Comprueba si el bot está online.
+  
     !info: Muestra información sobre este bot.
+  
     !ayuda: Muestra esta lista de comandos.
+  
     !tiempo: Muestra el tiempo para tu ubicación, un nodo o una ciudad.
+  
     !hora: Muestra la hora actual del servidor.
+  
     !reset: Borra tu historial de conversación con la IA.
+  
     !nodo: Muestra info detallada de un nodo. Ej: !nodo @MiNodo
+  
     !meshbot: Muestra información sobre cómo usar el bot de IA.
 
 ---
