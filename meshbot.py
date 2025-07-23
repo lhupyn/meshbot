@@ -420,7 +420,9 @@ def process_incoming_meshtastic_packet(client, raw_payload, topic):
                     barometric_pressure=pressure
                 )
 
-        elif port_num == portnums_pb2.TEXT_MESSAGE_APP and config.SECONDARY_CHANNEL_ENABLED and source_channel == config.SECONDARY_CHANNEL_NAME:
+        # --- CAMBIO PRINCIPAL AQUÍ ---
+        # Se elimina la comprobación del canal para que los mensajes de texto se procesen en ambos canales
+        elif port_num == portnums_pb2.TEXT_MESSAGE_APP:
             text = mp.decoded.payload.decode('utf-8', 'ignore')
             
             if mp.to == config.OUR_NODE_NUMBER:
