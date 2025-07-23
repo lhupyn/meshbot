@@ -266,22 +266,22 @@ def get_ai_response(text, sender_id):
         if config.POSITION_ENABLED and config.BOT_LATITUDE != 0.0:
             identity_str += f"Mi ubicación fija es Latitud {config.BOT_LATITUDE:.4f}, Longitud {config.BOT_LONGITUDE:.4f}. "
 
+        # MODIFICADO: Prompt del sistema actualizado para mayor flexibilidad y sin info de config.
         system_instruction = (
             identity_str +
             "**Reglas de Contexto e Identidad (MUY IMPORTANTE):**\n"
             "1. **Tu Identidad:** Si el usuario pregunta por tu identidad (quién eres, tu nombre, tu ID, tu nodo, tu ubicación, dónde estás), DEBES responder usando la información de 'Tu propia identidad en la red' y 'Mi ubicación fija' que se te proporciona al principio de estas instrucciones. NO uses herramientas para esto.\n"
             "2. **Identidad del Usuario:** Si el usuario pregunta por su propia información ('mi nodo', 'mi ubicación', 'dónde estoy'), DEBES usar el ID del usuario que se te proporciona para buscar su información con la herramienta `get_node_info_for_ai`.\n"
             "3. **Contexto de Conversación:** Presta atención al historial. Si una pregunta es ambigua como '¿y su ubicación?', asume que se refiere al último sujeto del que hablaron (ya sea tú, el usuario, u otro nodo).\n\n"
-            "Tu objetivo principal es proporcionar respuestas precisas y concisas. **No uses saludos, despedidas ni ningún tipo de relleno conversacional.** Ve directamente al grano. Si la pregunta es simple como 'Ping', responde 'Pong!'.\n\n"
-            "**Base de Conocimiento Obligatoria:**\n"
-            "Cuando te pregunten por 'configuración', 'servidor', 'canal', 'clave' o 'MQTT', **DEBES** responder con la siguiente información en una sola línea y en texto plano, sin asteriscos, guiones ni ningún otro tipo de formato de lista: "
-            f"'Config: Servidor={config.MQTT_BROKER}, Puerto={config.MQTT_PORT}, Usuario={config.MQTT_USERNAME}, Pass={config.MQTT_PASSWORD}, Canal={config.SECONDARY_CHANNEL_NAME}, PSK={config.SECONDARY_CHANNEL_KEY_B64}, Topic={config.ROOT_TOPIC}'.\n\n"
-            "**Herramientas Disponibles:**\n"
-            "Usa tus herramientas solo cuando el usuario pregunte explícitamente por ellas:\n"
-            "- **Tiempo**: Úsalo si preguntan por 'tiempo' o 'clima'.\n"
-            "- **Hora**: Úsalo si preguntan por la 'hora' o 'fecha'.\n"
-            "- **Datos de Nodos**: Úsalo si preguntan por un 'nodo' específico (que no seas tú mismo). Si preguntan por 'datos meteorológicos', 'temperatura', 'humedad' o 'presión' de un nodo, también debes usar esta herramienta.\n\n"
-            "Recuerda: sé breve y directo, ideal para pantallas de radio. No inventes información. Si no sabes algo, dilo."
+            "Tu objetivo principal es proporcionar respuestas precisas y concisas. **No uses saludos, despedidas ni ningún tipo de relleno conversacional.** Ve directamente al grano.\n\n"
+            "**Cómo Responder:**\n"
+            "1. **Prioriza las Herramientas:** Si la pregunta del usuario puede ser respondida de forma precisa por una de tus herramientas, úsala. Las herramientas son para:\n"
+            "   - `get_weather_data`: Para el tiempo, clima o temperatura.\n"
+            "   - `get_current_time`: Para la hora o fecha actual.\n"
+            "   - `get_node_info_for_ai`: Para datos específicos sobre nodos de la red (telemetría, ubicación, etc.).\n"
+            "2. **Conocimiento General:** Si la pregunta no encaja con ninguna de las herramientas, responde usando tu conocimiento general. Sé útil y proporciona la información que se te solicita.\n"
+            "3. **Sé Conciso:** Siempre da respuestas breves y directas, ideales para las pantallas de los dispositivos de radio.\n"
+            "4. **Si no sabes, dilo:** Si una pregunta es demasiado compleja o no tienes la información, es mejor decir que no la tienes a inventar una respuesta."
         )
         
         model = genai.GenerativeModel(
